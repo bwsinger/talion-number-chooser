@@ -1,13 +1,12 @@
-import json
-import re
-from typing import Callable, Optional, Any
-
 import requests
+from json import JSONDecodeError
+import re
+from typing import Callable, Optional, Any, List, Dict
+
 from backoff import on_exception, expo
 from ratelimit import RateLimitDecorator, sleep_and_retry
-from requests import RequestException
 
-from .types import MTGCard
+from mytypes import MTGCard
 
 
 moxfield_rate_limit = RateLimitDecorator(calls=20, period=1)
@@ -30,7 +29,7 @@ def handle_final_exception(fail_response: Optional[Any]) -> Callable:
             # Final exception catch
             try:
                 return func(*args, **kwargs)
-            except (RequestException, json.JSONDecodeError):
+            except (requests.RequestException, JSONDecodeError):
                 # All requests failed
                 return fail_response
 
@@ -49,7 +48,7 @@ def handle_moxfield_request(fail_response: Optional[Any] = None) -> Callable:
     def decorator(func):
         @sleep_and_retry
         @moxfield_rate_limit
-        @on_exception(expo, RequestException, max_tries=2, max_time=0.75)
+        @on_exception(expo, requests.RequestException, max_tries=2, max_time=0.75)
         @handle_final_exception(fail_response)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
@@ -64,7 +63,7 @@ MOXFIELD REQUESTS
 """
 
 @handle_moxfield_request({})
-def get_data_url(url: str, params: Optional[dict[str, str]] = None) -> dict:
+def get_data_url(url: str, params: Optional[Dict[str, str]] = None) -> Dict:
     """
     Get JSON data from any valid API URL.
     @param url: Valid API URL, such as Moxfield.
@@ -82,13 +81,12 @@ UTILITY FUNCTIONS
 """
 
 
-def get_cards_from_moxfield_decklist(url: str, params: Optional[dict[str, str]] = None) -> list[MTGCard]:
+def get_cards_from_moxfield_decklist(url: str) -> List[MTGCard]:
     """
     Extract the card info from a single Moxfield decklist.
     @param url: Either the API endpoint or full URL.
-    @param params: Optional parameters to pass to API endpoint.
     """
-    cards: list[MTGCard] = list()
+    cards: List[MTGCard] = list()
 
     res_json = get_data_url(url) or {}
 
@@ -101,31 +99,33 @@ def get_cards_from_moxfield_decklist(url: str, params: Optional[dict[str, str]] 
 
     raw_cards = {**main_raw, **commander_raw}
 
-    for raw_card in raw_cards:
-        card = MTGCard()
-        card.id = raw_card.get('card', {}).get('id')
-        card.name = raw_card.get('card', {}).get('name')
-        card.name = raw_card.get('card', {}).get('cmc')
-        card.power = raw_card.get('card', {}).get('power', '')
-        card.toughness = raw_card.get('card', {}).get('toughness', '')
-        card.quantity = raw_card.get('quantity', 1)
+    for key, raw_card in raw_cards.items():
+        # Just don't bother counting Double Faced cards. The data is incomplete
+        if not raw_card.get('card', {}).get('card_faces', []):
+            card = MTGCard(
+                id=raw_card.get('card', {}).get('id'),
+                name=raw_card.get('card', {}).get('name'),
+                cmc=raw_card.get('card', {}).get('cmc'),
+                power=raw_card.get('card', {}).get('power', ''),
+                toughness=raw_card.get('card', {}).get('toughness', ''),
+                quantity=raw_card.get('quantity', 1),
+            )
+
+            cards.append(card)
 
     return cards
 
 
-def get_all_moxfield_decklist_cards(params: dict) -> list[MTGCard]:
+def get_all_moxfield_decklist_cards(urls: List[str]) -> List[MTGCard]:
     """
     Lookup Card data for every decklist in the config on Moxfield.
     @note: https://api.moxfield.com/v2/decks/all/{deck_id}
     @param params: Likley not needed, but leaving the option open.
     @return: Card data as dict.
     """
-    # TODO: Get decklists from config file
-    decklists = ['https://api.moxfield.com/v2/decks/all/hHcoQkbo2kWxXSCNyXGX5A']
+    all_cards: List[MTGCard] = list()
 
-    all_cards: list[MTGCard] = list()
-
-    for decklist in decklists:
+    for decklist in urls:
         # Extract the deck_id from a valid Moxfield decklist URL
         deck_id_match = re.search(r'moxfield\.com\/decks\/(.{22})$', decklist)
 
@@ -134,7 +134,7 @@ def get_all_moxfield_decklist_cards(params: dict) -> list[MTGCard]:
 
         deck_id = deck_id_match.group(1)
 
-        cards = get_cards_from_moxfield_decklist(f"https://api.moxfield.com/v2/decks/all/{deck_id}", params=params)
+        cards = get_cards_from_moxfield_decklist(f"https://api.moxfield.com/v2/decks/all/{deck_id}")
 
         all_cards.extend(cards)
     
