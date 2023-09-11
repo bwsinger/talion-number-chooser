@@ -1,3 +1,7 @@
+# Personal
+api-return-examples
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/windows,python,visualstudiocode,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,python,visualstudiocode,macos
 
@@ -208,7 +212,6 @@ pyrightconfig.json
 
 ### VisualStudioCode ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
