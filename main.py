@@ -25,12 +25,11 @@ if __name__ == "__main__":
     }
 
     for card in cards:
-        if results.get(card.cmc) is not None:
-            results[card.cmc] += card.quantity
-        if results.get(card.power) is not None:
-            results[card.power] += card.quantity
-        if results.get(card.toughness) is not None:
-            results[card.toughness] += card.quantity
+        attributes = set((card.cmc, card.power, card.toughness))
+
+        for attr in attributes:
+            if results.get(attr) is not None:
+                results[attr] += card.quantity
 
     for key, value in results.items():
         print(f'[{key:2s}]: {value}')
