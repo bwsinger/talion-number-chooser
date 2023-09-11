@@ -1,19 +1,18 @@
+import os
 from src.fetch import get_all_moxfield_decklist_cards
+from src.settings import DECKLIST_PATH
+from src.core import get_decklist_ids
 
 if __name__ == "__main__":
-    # TODO: Get decklists from config file
-    decklists = [
-        'https://www.moxfield.com/decks/hHcoQkbo2kWxXSCNyXGX5A', # Krark/Sakashima
-        'https://www.moxfield.com/decks/1ywQ_gE8jUuPBosTXFyZSQ', # Korvold
-        'https://www.moxfield.com/decks/TO9kxf5Gl0OpmOHQ0p5ugQ', # Rocco
-        'https://www.moxfield.com/decks/ujKCddgPHEq3BJv86FjUYg', # Tivit
-        'https://www.moxfield.com/decks/jT8Y9X4tlUmeNZ2AjkD1Vg', # Najeela
-        'https://www.moxfield.com/decks/mlwTdaEb2EGzzOmt24FVPw', # Yuriko
-        'https://www.moxfield.com/decks/OnuH5x8EgE-BBhKb5g9lXg', # Yasharn
-        'https://www.moxfield.com/decks/zG6OuWe6MES8cbAbLC4Mng', # Kinnan
-    ]
+    deck_ids = []
 
-    cards = get_all_moxfield_decklist_cards(decklists)
+    if os.path.isfile(DECKLIST_PATH):
+        with open(DECKLIST_PATH, "r", encoding="utf-8") as f:
+            # Extract the decklist IDs from the URLs
+            deck_ids = get_decklist_ids(f.readlines())
+
+
+    cards = get_all_moxfield_decklist_cards(deck_ids)
 
     results = {
         '1': 0,
@@ -35,5 +34,12 @@ if __name__ == "__main__":
             if results.get(attr) is not None:
                 results[attr] += card.quantity
 
+    # Stats
+    total_hits = sum([value for key,value in results.items()])
+
+    print(f'Number     Count       Percentage')
+    print('---------------------------------')
+
     for key, value in results.items():
-        print(f'[{key:2s}]: {value}')
+        percentage = round((value/total_hits) * 100, 2)
+        print(f'[{int(key):2d}]: {value:10d} {percentage:11.2f}')

@@ -1,6 +1,5 @@
 import requests
 from json import JSONDecodeError
-import re
 from typing import Callable, Optional, Any, List, Dict
 
 from backoff import on_exception, expo
@@ -99,7 +98,7 @@ def get_cards_from_moxfield_decklist(url: str) -> List[MTGCard]:
 
     raw_cards = {**main_raw, **commander_raw}
 
-    for key, raw_card in raw_cards.items():
+    for _, raw_card in raw_cards.items():
         # Just don't bother counting Double Faced cards. The data is incomplete
         if not raw_card.get('card', {}).get('card_faces', []):
             card = MTGCard(
@@ -116,26 +115,17 @@ def get_cards_from_moxfield_decklist(url: str) -> List[MTGCard]:
     return cards
 
 
-def get_all_moxfield_decklist_cards(urls: List[str]) -> List[MTGCard]:
+def get_all_moxfield_decklist_cards(deck_ids: List[str]) -> List[MTGCard]:
     """
     Lookup Card data for every decklist in the config on Moxfield.
     @note: https://api.moxfield.com/v2/decks/all/{deck_id}
-    @param params: Likley not needed, but leaving the option open.
+    @deck_ids: A list of the deck IDs from Moxfield URLs.
     @return: Card data as dict.
     """
     all_cards: List[MTGCard] = list()
 
-    for decklist in urls:
-        # Extract the deck_id from a valid Moxfield decklist URL
-        deck_id_match = re.search(r'moxfield\.com\/decks\/(.{22})$', decklist)
-
-        if deck_id_match is None:
-            continue
-
-        deck_id = deck_id_match.group(1)
-
+    for deck_id in deck_ids:
         cards = get_cards_from_moxfield_decklist(f"https://api.moxfield.com/v2/decks/all/{deck_id}")
-
         all_cards.extend(cards)
     
     return all_cards or []
