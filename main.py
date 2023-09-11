@@ -8,6 +8,9 @@ if __name__ == "__main__":
         'https://www.moxfield.com/decks/TO9kxf5Gl0OpmOHQ0p5ugQ', # Rocco
         'https://www.moxfield.com/decks/ujKCddgPHEq3BJv86FjUYg', # Tivit
         'https://www.moxfield.com/decks/jT8Y9X4tlUmeNZ2AjkD1Vg', # Najeela
+        'https://www.moxfield.com/decks/mlwTdaEb2EGzzOmt24FVPw', # Yuriko
+        'https://www.moxfield.com/decks/OnuH5x8EgE-BBhKb5g9lXg', # Yasharn
+        'https://www.moxfield.com/decks/zG6OuWe6MES8cbAbLC4Mng', # Kinnan
     ]
 
     cards = get_all_moxfield_decklist_cards(decklists)
