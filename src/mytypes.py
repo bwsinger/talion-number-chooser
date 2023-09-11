@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 class MTGCard:
     id: str
     name: str
-    cmc: float
+    cmc: str
     power: str = ''
     toughness: str = ''
     quantity: int = 1
