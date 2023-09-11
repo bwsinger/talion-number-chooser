@@ -3,10 +3,11 @@ from src.fetch import get_all_moxfield_decklist_cards
 if __name__ == "__main__":
     # TODO: Get decklists from config file
     decklists = [
-        'https://www.moxfield.com/decks/hHcoQkbo2kWxXSCNyXGX5A',
-        'https://www.moxfield.com/decks/1ywQ_gE8jUuPBosTXFyZSQ',
-        'https://www.moxfield.com/decks/TO9kxf5Gl0OpmOHQ0p5ugQ',
-        'https://www.moxfield.com/decks/ujKCddgPHEq3BJv86FjUYg',
+        'https://www.moxfield.com/decks/hHcoQkbo2kWxXSCNyXGX5A', # Krark/Sakashima
+        'https://www.moxfield.com/decks/1ywQ_gE8jUuPBosTXFyZSQ', # Korvold
+        'https://www.moxfield.com/decks/TO9kxf5Gl0OpmOHQ0p5ugQ', # Rocco
+        'https://www.moxfield.com/decks/ujKCddgPHEq3BJv86FjUYg', # Tivit
+        'https://www.moxfield.com/decks/jT8Y9X4tlUmeNZ2AjkD1Vg', # Najeela
     ]
 
     cards = get_all_moxfield_decklist_cards(decklists)

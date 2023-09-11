@@ -106,8 +106,8 @@ def get_cards_from_moxfield_decklist(url: str) -> List[MTGCard]:
                 id=raw_card.get('card', {}).get('id'),
                 name=raw_card.get('card', {}).get('name'),
                 cmc=str(int(raw_card.get('card', {}).get('cmc'))), # convert from float to string
-                power=raw_card.get('card', {}).get('power', ''),
-                toughness=raw_card.get('card', {}).get('toughness', ''),
+                power=raw_card.get('card', {}).get('power'),
+                toughness=raw_card.get('card', {}).get('toughness'),
                 quantity=raw_card.get('quantity', 1),
             )
 
